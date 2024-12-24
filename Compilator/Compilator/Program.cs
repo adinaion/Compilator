@@ -1,56 +1,40 @@
 ﻿using System;
 using System.IO;
-
 using Antlr4.Runtime;
-using Antlr4.Runtime.Misc;
-using System.Collections.Generic;
 
-public class SpeakLine
+class Program
 {
-    public string Person { get; set; }
-    public string Text { get; set; }
-}
-
-public class BasicSpeakVisitor : SpeakBaseVisitor<object>
-{
-    public List<SpeakLine> SpeakLines = new List<SpeakLine>();
-
-    public override object VisitLine([NotNull] SpeakParser.LineContext context)
+    static void Main(string[] args)
     {
-        var name = context.name();
-        var opinion = context.opinion();
+        // 1. Citește codul sursă din fișierul "ProgramExemple.txt"
+        string filePath = "../../../ProgramExemple.txt";
 
-        SpeakLine line = new SpeakLine() { Person = name.GetText(), Text = opinion.GetText().Trim('"') };
-
-        SpeakLines.Add(line);
-
-        return line;
-    }
-}
-
-public class Program
-{
-    private static SpeakParser Setup(string text)
-    {
-        AntlrInputStream inputStream = new AntlrInputStream(text);
-        SpeakLexer speakLexer = new SpeakLexer(inputStream);
-        CommonTokenStream commonTokenStream = new CommonTokenStream(speakLexer);
-        SpeakParser speakParser = new SpeakParser(commonTokenStream);
-        return speakParser;
-    }
-
-    public static void Main()
-    {
-        string text = File.ReadAllText("../../../text.in");
-
-        SpeakParser parser = Setup(text);
-        SpeakParser.ChatContext context = parser.chat();
-        BasicSpeakVisitor visitor = new BasicSpeakVisitor();
-        visitor.Visit(context);
-
-        foreach (var line in visitor.SpeakLines)
+        if (!File.Exists(filePath))
         {
-            Console.WriteLine("{0} has said {1}", line.Person, line.Text);
+            Console.WriteLine($"Fișierul {filePath} nu există!");
+            return;
         }
+
+        string sourceCode = File.ReadAllText(filePath);
+
+        // 2. Creează un Lexer pentru a genera tokens
+        var lexer = new MiniLangLexer(new AntlrInputStream(sourceCode));
+        var tokens = new CommonTokenStream(lexer);
+
+        // 3. Afișează lista de tokens
+        Console.WriteLine("Tokens:");
+        tokens.Fill();
+        foreach (var token in tokens.GetTokens())
+        {
+            Console.WriteLine($"<{MiniLangLexer.DefaultVocabulary.GetSymbolicName(token.Type)}, {token.Text}>");
+        }
+
+        // 4. Creează un Parser pentru a genera arborele de sintaxă
+        var parser = new MiniLangParser(tokens);
+        var tree = parser.program();
+
+        // 5. Afișează arborele de sintaxă (parse tree)
+        Console.WriteLine("\nParse Tree:");
+        Console.WriteLine(tree.ToStringTree(parser));
     }
 }

@@ -8,3 +8,13 @@ C:\Users\Adina\Desktop\Compilator\Compilator\obj\Debug\Compilator.csproj.CoreCom
 C:\Users\Adina\Desktop\Compilator\Compilator\obj\Debug\Compilator.csproj.Up2Date
 C:\Users\Adina\Desktop\Compilator\Compilator\obj\Debug\Compilator.exe
 C:\Users\Adina\Desktop\Compilator\Compilator\obj\Debug\Compilator.pdb
+D:\Facultate\Anul 2\Semestrul 1\LFC\Teme Obligatorii\Tema2\Compilator\Compilator\Compilator\bin\Debug\Compilator.exe.config
+D:\Facultate\Anul 2\Semestrul 1\LFC\Teme Obligatorii\Tema2\Compilator\Compilator\Compilator\bin\Debug\Compilator.exe
+D:\Facultate\Anul 2\Semestrul 1\LFC\Teme Obligatorii\Tema2\Compilator\Compilator\Compilator\bin\Debug\Compilator.pdb
+D:\Facultate\Anul 2\Semestrul 1\LFC\Teme Obligatorii\Tema2\Compilator\Compilator\Compilator\bin\Debug\Antlr4.Runtime.Standard.dll
+D:\Facultate\Anul 2\Semestrul 1\LFC\Teme Obligatorii\Tema2\Compilator\Compilator\Compilator\bin\Debug\Antlr4.Runtime.Standard.xml
+D:\Facultate\Anul 2\Semestrul 1\LFC\Teme Obligatorii\Tema2\Compilator\Compilator\Compilator\obj\Debug\Compilator.csproj.AssemblyReference.cache
+D:\Facultate\Anul 2\Semestrul 1\LFC\Teme Obligatorii\Tema2\Compilator\Compilator\Compilator\obj\Debug\Compilator.csproj.CoreCompileInputs.cache
+D:\Facultate\Anul 2\Semestrul 1\LFC\Teme Obligatorii\Tema2\Compilator\Compilator\Compilator\obj\Debug\Compilator.csproj.Up2Date
+D:\Facultate\Anul 2\Semestrul 1\LFC\Teme Obligatorii\Tema2\Compilator\Compilator\Compilator\obj\Debug\Compilator.exe
+D:\Facultate\Anul 2\Semestrul 1\LFC\Teme Obligatorii\Tema2\Compilator\Compilator\Compilator\obj\Debug\Compilator.pdb
