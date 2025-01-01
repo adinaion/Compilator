@@ -18,3 +18,13 @@ D:\Facultate\Anul 2\Semestrul 1\LFC\Teme Obligatorii\Tema2\Compilator\Compilator
 D:\Facultate\Anul 2\Semestrul 1\LFC\Teme Obligatorii\Tema2\Compilator\Compilator\Compilator\obj\Debug\Compilator.csproj.Up2Date
 D:\Facultate\Anul 2\Semestrul 1\LFC\Teme Obligatorii\Tema2\Compilator\Compilator\Compilator\obj\Debug\Compilator.exe
 D:\Facultate\Anul 2\Semestrul 1\LFC\Teme Obligatorii\Tema2\Compilator\Compilator\Compilator\obj\Debug\Compilator.pdb
+C:\Users\Adina\Desktop\LFC\Compilator\Compilator\Compilator\bin\Debug\Compilator.exe.config
+C:\Users\Adina\Desktop\LFC\Compilator\Compilator\Compilator\bin\Debug\Compilator.exe
+C:\Users\Adina\Desktop\LFC\Compilator\Compilator\Compilator\bin\Debug\Compilator.pdb
+C:\Users\Adina\Desktop\LFC\Compilator\Compilator\Compilator\bin\Debug\Antlr4.Runtime.Standard.dll
+C:\Users\Adina\Desktop\LFC\Compilator\Compilator\Compilator\bin\Debug\Antlr4.Runtime.Standard.xml
+C:\Users\Adina\Desktop\LFC\Compilator\Compilator\Compilator\obj\Debug\Compilator.csproj.AssemblyReference.cache
+C:\Users\Adina\Desktop\LFC\Compilator\Compilator\Compilator\obj\Debug\Compilator.csproj.CoreCompileInputs.cache
+C:\Users\Adina\Desktop\LFC\Compilator\Compilator\Compilator\obj\Debug\Compilator.csproj.Up2Date
+C:\Users\Adina\Desktop\LFC\Compilator\Compilator\Compilator\obj\Debug\Compilator.exe
+C:\Users\Adina\Desktop\LFC\Compilator\Compilator\Compilator\obj\Debug\Compilator.pdb

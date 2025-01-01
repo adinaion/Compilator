@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-// Generated from d:/Facultate/Anul 2/Semestrul 1/LFC/Teme Obligatorii/Tema2/Compilator/Compilator/Compilator/MiniLang.g4 by ANTLR 4.13.1
+// Generated from c:/Users/Adina/Desktop/LFC/Compilator/Compilator/Compilator/MiniLang.g4 by ANTLR 4.13.1
 
 // Unreachable code detected
 #pragma warning disable 0162
@@ -55,6 +55,12 @@ public interface IMiniLangVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitAssignment([NotNull] MiniLangParser.AssignmentContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="MiniLangParser.incrementDecrement"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitIncrementDecrement([NotNull] MiniLangParser.IncrementDecrementContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="MiniLangParser.ifStatement"/>.
 	/// </summary>
@@ -109,6 +115,13 @@ public interface IMiniLangVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitGreaterThanExpr([NotNull] MiniLangParser.GreaterThanExprContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>PreDecrementExpr</c>
+	/// labeled alternative in <see cref="MiniLangParser.expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitPreDecrementExpr([NotNull] MiniLangParser.PreDecrementExprContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>SubExpr</c>
 	/// labeled alternative in <see cref="MiniLangParser.expression"/>.
 	/// </summary>
@@ -137,12 +150,26 @@ public interface IMiniLangVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitNotEqualExpr([NotNull] MiniLangParser.NotEqualExprContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>PostIncrementExpr</c>
+	/// labeled alternative in <see cref="MiniLangParser.expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitPostIncrementExpr([NotNull] MiniLangParser.PostIncrementExprContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>OrExpr</c>
 	/// labeled alternative in <see cref="MiniLangParser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitOrExpr([NotNull] MiniLangParser.OrExprContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>AssignExpr</c>
+	/// labeled alternative in <see cref="MiniLangParser.expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitAssignExpr([NotNull] MiniLangParser.AssignExprContext context);
 	/// <summary>
 	/// Visit a parse tree produced by the <c>LessEqualExpr</c>
 	/// labeled alternative in <see cref="MiniLangParser.expression"/>.
@@ -151,12 +178,26 @@ public interface IMiniLangVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitLessEqualExpr([NotNull] MiniLangParser.LessEqualExprContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>PreIncrementExpr</c>
+	/// labeled alternative in <see cref="MiniLangParser.expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitPreIncrementExpr([NotNull] MiniLangParser.PreIncrementExprContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>DivExpr</c>
 	/// labeled alternative in <see cref="MiniLangParser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitDivExpr([NotNull] MiniLangParser.DivExprContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>PostDecrementExpr</c>
+	/// labeled alternative in <see cref="MiniLangParser.expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitPostDecrementExpr([NotNull] MiniLangParser.PostDecrementExprContext context);
 	/// <summary>
 	/// Visit a parse tree produced by the <c>NumberExpr</c>
 	/// labeled alternative in <see cref="MiniLangParser.expression"/>.
@@ -178,6 +219,13 @@ public interface IMiniLangVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitNotExpr([NotNull] MiniLangParser.NotExprContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>ModExpr</c>
+	/// labeled alternative in <see cref="MiniLangParser.expression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitModExpr([NotNull] MiniLangParser.ModExprContext context);
 	/// <summary>
 	/// Visit a parse tree produced by the <c>ParenExpr</c>
 	/// labeled alternative in <see cref="MiniLangParser.expression"/>.
