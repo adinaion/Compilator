@@ -15,6 +15,7 @@ IDENTIFIER: [a-zA-Z_][a-zA-Z0-9_]*;
 NUMBER: [0-9]+ ('.' [0-9]+)?;
 STRING: '"' .*? '"';
 COMMENT: '//' ~[\r\n]* -> skip;
+COMMENT_MULTI: '/*' .*? '*/' -> skip;
 WS: [ \t\r\n]+ -> skip;
 
 // Arithmetic operators
@@ -58,7 +59,16 @@ RBRACE: '}';
 COMMA: ',';
 
 // Parser rules
-program: statement+;
+program: (functionDeclaration | statement)+;
+
+functionDeclaration:
+	type IDENTIFIER LPAREN parameterList? RPAREN block;
+
+parameterList: parameter (COMMA parameter)*;
+
+parameter: type IDENTIFIER;
+
+block: LBRACE statement* RBRACE;
 
 statement:
 	declaration
@@ -66,9 +76,13 @@ statement:
 	| incrementDecrement
 	| ifStatement
 	| forStatement
-	| whileStatement;
+	| whileStatement
+	| returnStatement
+	| functionCall SEMICOLON; // Adăugat
 
-declaration: KEYWORD IDENTIFIER (ASSIGN expression)? SEMICOLON;
+returnStatement: 'return' expression? SEMICOLON;
+
+declaration: type IDENTIFIER (ASSIGN expression)? SEMICOLON;
 
 assignment:
 	IDENTIFIER (
@@ -87,15 +101,12 @@ incrementDecrement:
 	| DECREMENT IDENTIFIER SEMICOLON;
 
 ifStatement:
-	'if' LPAREN expression RPAREN LBRACE statement* RBRACE (
-		'else' LBRACE statement* RBRACE
-	)?;
+	'if' LPAREN expression RPAREN block ('else' block)?;
 
 forStatement:
-	'for' LPAREN declaration expression SEMICOLON assignment RPAREN LBRACE statement* RBRACE;
+	'for' LPAREN declaration expression SEMICOLON assignment RPAREN block;
 
-whileStatement:
-	'while' LPAREN expression RPAREN LBRACE statement* RBRACE;
+whileStatement: 'while' LPAREN expression RPAREN block;
 
 expression:
 	LPAREN expression RPAREN		# ParenExpr
@@ -120,4 +131,12 @@ expression:
 	| IDENTIFIER					# IdentifierExpr
 	| NUMBER						# NumberExpr
 	| STRING						# StringExpr
-	| IDENTIFIER ASSIGN expression	# AssignExpr;
+	| IDENTIFIER ASSIGN expression	# AssignExpr
+	| functionCall					# FunctionCallExpr; // Adăugat
+
+functionCall: IDENTIFIER LPAREN argumentList? RPAREN; // Adăugat
+
+argumentList: expression (COMMA expression)*; // Adăugat
+
+// Type rule for variable types
+type: 'int' | 'float' | 'string' | 'void';
