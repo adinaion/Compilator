@@ -2,6 +2,7 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
+    <LangVersion>latest</LangVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{504BE023-8E8A-4431-BE68-E668B01E0A4D}</ProjectGuid>
@@ -46,11 +47,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LanguageVisitor.cs" />
     <Compile Include="MiniLangBaseVisitor.cs" />
     <Compile Include="MiniLangLexer.cs" />
     <Compile Include="MiniLangParser.cs" />
     <Compile Include="MiniLangVisitor.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="ProgramData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
