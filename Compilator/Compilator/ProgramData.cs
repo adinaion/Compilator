@@ -58,7 +58,7 @@ namespace MiniLang
         public List<Function> Functions { get; set; } = new List<Function>();
 
         // Funcția curentă
-        public Function CurrentFunction { get; set; } // Adăugat pentru funcția curentă
+        public Function CurrentFunction { get; set; }
 
         // Adăugare unitate lexicală
         public void AddLexicalUnit(string token, string lexeme, int line)

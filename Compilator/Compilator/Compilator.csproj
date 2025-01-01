@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CompilerError.cs" />
+    <Compile Include="CustomMiniLangLexer.cs" />
     <Compile Include="ErrorHandler.cs" />
     <Compile Include="LanguageVisitor.cs" />
     <Compile Include="LexicalError.cs" />

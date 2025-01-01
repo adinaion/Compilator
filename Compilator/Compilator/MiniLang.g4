@@ -6,16 +6,22 @@ KEYWORD:
 	| 'float'
 	| 'string'
 	| 'void'
+	| 'double'
 	| 'if'
 	| 'else'
 	| 'for'
 	| 'while'
 	| 'return';
+
 IDENTIFIER: [a-zA-Z_][a-zA-Z0-9_]*;
+
 NUMBER: [0-9]+ ('.' [0-9]+)?;
+
 STRING: '"' .*? '"';
+
 COMMENT: '//' ~[\r\n]* -> skip;
 COMMENT_MULTI: '/*' .*? '*/' -> skip;
+
 WS: [ \t\r\n]+ -> skip;
 
 // Arithmetic operators
@@ -56,10 +62,15 @@ LPAREN: '(';
 RPAREN: ')';
 LBRACE: '{';
 RBRACE: '}';
+
 COMMA: ',';
 
 // Parser rules
-program: (functionDeclaration | statement)+;
+program: globalDeclarations* (functionDeclaration | statement)+;
+
+globalDeclarations: varDeclaration+;
+
+varDeclaration: type IDENTIFIER ASSIGN expression SEMICOLON;
 
 functionDeclaration:
 	type IDENTIFIER LPAREN parameterList? RPAREN block;
@@ -78,7 +89,7 @@ statement:
 	| forStatement
 	| whileStatement
 	| returnStatement
-	| functionCall SEMICOLON; // Adăugat
+	| functionCall SEMICOLON;
 
 returnStatement: 'return' expression? SEMICOLON;
 
@@ -109,16 +120,11 @@ forStatement:
 whileStatement: 'while' LPAREN expression RPAREN block;
 
 expression:
-	LPAREN expression RPAREN		# ParenExpr
-	| INCREMENT IDENTIFIER			# PreIncrementExpr
-	| DECREMENT IDENTIFIER			# PreDecrementExpr
-	| IDENTIFIER INCREMENT			# PostIncrementExpr
-	| IDENTIFIER DECREMENT			# PostDecrementExpr
+	expression ADD expression		# AddExpr
+	| expression SUB expression		# SubExpr
 	| expression MUL expression		# MulExpr
 	| expression DIV expression		# DivExpr
 	| expression MOD expression		# ModExpr
-	| expression ADD expression		# AddExpr
-	| expression SUB expression		# SubExpr
 	| expression LT expression		# LessThanExpr
 	| expression GT expression		# GreaterThanExpr
 	| expression LE expression		# LessEqualExpr
@@ -128,15 +134,16 @@ expression:
 	| expression AND expression		# AndExpr
 	| expression OR expression		# OrExpr
 	| NOT expression				# NotExpr
+	| LPAREN expression RPAREN		# ParenExpr
 	| IDENTIFIER					# IdentifierExpr
 	| NUMBER						# NumberExpr
 	| STRING						# StringExpr
 	| IDENTIFIER ASSIGN expression	# AssignExpr
-	| functionCall					# FunctionCallExpr; // Adăugat
+	| functionCall					# FunctionCallExpr;
 
-functionCall: IDENTIFIER LPAREN argumentList? RPAREN; // Adăugat
+functionCall: IDENTIFIER LPAREN argumentList? RPAREN;
 
-argumentList: expression (COMMA expression)*; // Adăugat
+argumentList: expression (COMMA expression)*;
 
 // Type rule for variable types
 type: 'int' | 'float' | 'string' | 'void';
