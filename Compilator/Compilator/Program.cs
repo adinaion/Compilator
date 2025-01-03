@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Antlr4.Runtime;
 using MiniLang;
@@ -8,23 +9,23 @@ public class Program
     public static void Main()
     {
         // Citește fișierul sursă
-        Console.WriteLine("Se citește fișierul sursă...");
+        Console.WriteLine("Se citeste fisierul sursa...");
         string filePath = "../../../ProgramExemple.txt";
 
         if (!File.Exists(filePath))
         {
-            Console.WriteLine($"Fișierul {filePath} nu există!");
+            Console.WriteLine($"Fisierul {filePath} nu exista!");
             return;
         }
 
         string sourceCode = File.ReadAllText(filePath);
 
         // Creează lexer și parser
-        Console.WriteLine("Se analizează unitățile lexicale...");
+        Console.WriteLine("Se analizeaza unitatile lexicale...");
         var lexer = new MiniLangLexer(new AntlrInputStream(sourceCode));
         var tokens = new CommonTokenStream(lexer);
 
-        Console.WriteLine("Se creează arborele de sintaxă...");
+        Console.WriteLine("Se creeaza arborele de sintaxa...");
         var parser = new MiniLangParser(tokens);
         var tree = parser.program();
 
@@ -41,8 +42,10 @@ public class Program
             );
         }
 
+        
+
         // Analiza semantică
-        Console.WriteLine("Se efectuează analiza semantică...");
+        Console.WriteLine("Se efectueaza analiza semantica...");
         var visitor = new LanguageVisitor(programData);
         visitor.Visit(tree);
 
@@ -52,24 +55,24 @@ public class Program
         // Salvează datele în fișiere
         SaveProgramData(programData);
 
-        Console.WriteLine("Analiza lexicală, sintactică și semantică s-a încheiat cu succes!");
+        Console.WriteLine("Analiza lexicala, sintactica si semantica s-a încheiat cu succes!");
     }
 
     private static void PrintResults(ProgramData programData)
     {
-        Console.WriteLine("Unități lexicale:");
+        Console.WriteLine("\nUnitati lexicale:\n");
         foreach (var unit in programData.LexicalUnits)
         {
             Console.WriteLine(unit);
         }
 
-        Console.WriteLine("\nVariabile globale:");
+        Console.WriteLine("\nVariabile globale:\n");
         foreach (var variable in programData.GlobalVariables)
         {
             Console.WriteLine(variable);
         }
 
-        Console.WriteLine("\nFuncții:");
+        Console.WriteLine("\nFunctii:\n");
         foreach (var function in programData.Functions)
         {
             Console.WriteLine(function);
@@ -81,6 +84,6 @@ public class Program
         programData.SaveLexicalUnits("LexicalUnits.txt");
         programData.SaveGlobalVariables("GlobalVariables.txt");
         programData.SaveFunctions("Functions.txt");
-        Console.WriteLine("Datele au fost salvate cu succes în fișiere.");
+        Console.WriteLine("\nDatele au fost salvate cu succes în fisiere.");
     }
 }

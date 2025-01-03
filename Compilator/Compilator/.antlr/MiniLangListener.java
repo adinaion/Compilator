@@ -1,4 +1,4 @@
-// Generated from c:/Users/Adina/Desktop/LFC/Compilator/Compilator/Compilator/MiniLang.g4 by ANTLR 4.13.1
+// Generated from d:/Facultate/Anul 2/Semestrul 1/LFC/Teme Obligatorii/Tema2/Compilator/Compilator/Compilator/MiniLang.g4 by ANTLR 4.13.1
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
 /**
@@ -17,6 +17,66 @@ public interface MiniLangListener extends ParseTreeListener {
 	 */
 	void exitProgram(MiniLangParser.ProgramContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link MiniLangParser#globalDeclarations}.
+	 * @param ctx the parse tree
+	 */
+	void enterGlobalDeclarations(MiniLangParser.GlobalDeclarationsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MiniLangParser#globalDeclarations}.
+	 * @param ctx the parse tree
+	 */
+	void exitGlobalDeclarations(MiniLangParser.GlobalDeclarationsContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MiniLangParser#varDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void enterVarDeclaration(MiniLangParser.VarDeclarationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MiniLangParser#varDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void exitVarDeclaration(MiniLangParser.VarDeclarationContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MiniLangParser#functionDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void enterFunctionDeclaration(MiniLangParser.FunctionDeclarationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MiniLangParser#functionDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void exitFunctionDeclaration(MiniLangParser.FunctionDeclarationContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MiniLangParser#parameterList}.
+	 * @param ctx the parse tree
+	 */
+	void enterParameterList(MiniLangParser.ParameterListContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MiniLangParser#parameterList}.
+	 * @param ctx the parse tree
+	 */
+	void exitParameterList(MiniLangParser.ParameterListContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MiniLangParser#parameter}.
+	 * @param ctx the parse tree
+	 */
+	void enterParameter(MiniLangParser.ParameterContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MiniLangParser#parameter}.
+	 * @param ctx the parse tree
+	 */
+	void exitParameter(MiniLangParser.ParameterContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MiniLangParser#block}.
+	 * @param ctx the parse tree
+	 */
+	void enterBlock(MiniLangParser.BlockContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MiniLangParser#block}.
+	 * @param ctx the parse tree
+	 */
+	void exitBlock(MiniLangParser.BlockContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link MiniLangParser#statement}.
 	 * @param ctx the parse tree
 	 */
@@ -26,6 +86,16 @@ public interface MiniLangListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitStatement(MiniLangParser.StatementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MiniLangParser#returnStatement}.
+	 * @param ctx the parse tree
+	 */
+	void enterReturnStatement(MiniLangParser.ReturnStatementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MiniLangParser#returnStatement}.
+	 * @param ctx the parse tree
+	 */
+	void exitReturnStatement(MiniLangParser.ReturnStatementContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MiniLangParser#declaration}.
 	 * @param ctx the parse tree
@@ -46,6 +116,26 @@ public interface MiniLangListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitAssignment(MiniLangParser.AssignmentContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MiniLangParser#incrementDecrementWithoutSemicolon}.
+	 * @param ctx the parse tree
+	 */
+	void enterIncrementDecrementWithoutSemicolon(MiniLangParser.IncrementDecrementWithoutSemicolonContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MiniLangParser#incrementDecrementWithoutSemicolon}.
+	 * @param ctx the parse tree
+	 */
+	void exitIncrementDecrementWithoutSemicolon(MiniLangParser.IncrementDecrementWithoutSemicolonContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MiniLangParser#incrementDecrementWithSemicolon}.
+	 * @param ctx the parse tree
+	 */
+	void enterIncrementDecrementWithSemicolon(MiniLangParser.IncrementDecrementWithSemicolonContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MiniLangParser#incrementDecrementWithSemicolon}.
+	 * @param ctx the parse tree
+	 */
+	void exitIncrementDecrementWithSemicolon(MiniLangParser.IncrementDecrementWithSemicolonContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MiniLangParser#ifStatement}.
 	 * @param ctx the parse tree
@@ -197,6 +287,18 @@ public interface MiniLangListener extends ParseTreeListener {
 	 */
 	void exitOrExpr(MiniLangParser.OrExprContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code AssignExpr}
+	 * labeled alternative in {@link MiniLangParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterAssignExpr(MiniLangParser.AssignExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code AssignExpr}
+	 * labeled alternative in {@link MiniLangParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitAssignExpr(MiniLangParser.AssignExprContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code LessEqualExpr}
 	 * labeled alternative in {@link MiniLangParser#expression}.
 	 * @param ctx the parse tree
@@ -220,6 +322,18 @@ public interface MiniLangListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitDivExpr(MiniLangParser.DivExprContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code FunctionCallExpr}
+	 * labeled alternative in {@link MiniLangParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterFunctionCallExpr(MiniLangParser.FunctionCallExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code FunctionCallExpr}
+	 * labeled alternative in {@link MiniLangParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitFunctionCallExpr(MiniLangParser.FunctionCallExprContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code NumberExpr}
 	 * labeled alternative in {@link MiniLangParser#expression}.
@@ -257,6 +371,18 @@ public interface MiniLangListener extends ParseTreeListener {
 	 */
 	void exitNotExpr(MiniLangParser.NotExprContext ctx);
 	/**
+	 * Enter a parse tree produced by the {@code ModExpr}
+	 * labeled alternative in {@link MiniLangParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterModExpr(MiniLangParser.ModExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code ModExpr}
+	 * labeled alternative in {@link MiniLangParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitModExpr(MiniLangParser.ModExprContext ctx);
+	/**
 	 * Enter a parse tree produced by the {@code ParenExpr}
 	 * labeled alternative in {@link MiniLangParser#expression}.
 	 * @param ctx the parse tree
@@ -280,4 +406,34 @@ public interface MiniLangListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitLessThanExpr(MiniLangParser.LessThanExprContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MiniLangParser#functionCall}.
+	 * @param ctx the parse tree
+	 */
+	void enterFunctionCall(MiniLangParser.FunctionCallContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MiniLangParser#functionCall}.
+	 * @param ctx the parse tree
+	 */
+	void exitFunctionCall(MiniLangParser.FunctionCallContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MiniLangParser#argumentList}.
+	 * @param ctx the parse tree
+	 */
+	void enterArgumentList(MiniLangParser.ArgumentListContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MiniLangParser#argumentList}.
+	 * @param ctx the parse tree
+	 */
+	void exitArgumentList(MiniLangParser.ArgumentListContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link MiniLangParser#type}.
+	 * @param ctx the parse tree
+	 */
+	void enterType(MiniLangParser.TypeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link MiniLangParser#type}.
+	 * @param ctx the parse tree
+	 */
+	void exitType(MiniLangParser.TypeContext ctx);
 }

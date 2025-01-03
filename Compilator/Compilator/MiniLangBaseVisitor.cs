@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-// Generated from c:/Users/Adina/Desktop/LFC/Compilator/Compilator/Compilator/MiniLang.g4 by ANTLR 4.13.1
+// Generated from d:/Facultate/Anul 2/Semestrul 1/LFC/Teme Obligatorii/Tema2/Compilator/Compilator/Compilator/MiniLang.g4 by ANTLR 4.13.1
 
 // Unreachable code detected
 #pragma warning disable 0162
@@ -145,7 +145,7 @@ public partial class MiniLangBaseVisitor<Result> : AbstractParseTreeVisitor<Resu
 	/// <return>The visitor result.</return>
 	public virtual Result VisitAssignment([NotNull] MiniLangParser.AssignmentContext context) { return VisitChildren(context); }
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="MiniLangParser.incrementDecrement"/>.
+	/// Visit a parse tree produced by <see cref="MiniLangParser.incrementDecrementWithoutSemicolon"/>.
 	/// <para>
 	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
 	/// on <paramref name="context"/>.
@@ -153,7 +153,17 @@ public partial class MiniLangBaseVisitor<Result> : AbstractParseTreeVisitor<Resu
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	public virtual Result VisitIncrementDecrement([NotNull] MiniLangParser.IncrementDecrementContext context) { return VisitChildren(context); }
+	public virtual Result VisitIncrementDecrementWithoutSemicolon([NotNull] MiniLangParser.IncrementDecrementWithoutSemicolonContext context) { return VisitChildren(context); }
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="MiniLangParser.incrementDecrementWithSemicolon"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitIncrementDecrementWithSemicolon([NotNull] MiniLangParser.IncrementDecrementWithSemicolonContext context) { return VisitChildren(context); }
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="MiniLangParser.ifStatement"/>.
 	/// <para>

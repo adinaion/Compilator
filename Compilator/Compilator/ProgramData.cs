@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Ports;
 
 namespace MiniLang
 {
@@ -23,8 +24,9 @@ namespace MiniLang
             {
                 Int,
                 Float,
+                Double,
                 String,
-                Void
+                Void,
             }
 
             public Type VariableType { get; set; }
@@ -49,7 +51,7 @@ namespace MiniLang
                 $"Return: {ReturnType}\n" +
                 $"Parameters: {string.Join(", ", Parameters)}\n" +
                 $"Local Variables: {string.Join(", ", LocalVariables)}\n" +
-                $"Control Structures: {string.Join(", ", ControlStructures)}";
+                $"Control Structures: {string.Join(", ", ControlStructures)}\n";
         }
 
         // Date globale
@@ -58,6 +60,7 @@ namespace MiniLang
         public List<Function> Functions { get; set; } = new List<Function>();
 
         // Funcția curentă
+
         public Function CurrentFunction { get; set; }
 
         // Adăugare unitate lexicală

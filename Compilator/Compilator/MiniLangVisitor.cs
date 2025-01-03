@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-// Generated from c:/Users/Adina/Desktop/LFC/Compilator/Compilator/Compilator/MiniLang.g4 by ANTLR 4.13.1
+// Generated from d:/Facultate/Anul 2/Semestrul 1/LFC/Teme Obligatorii/Tema2/Compilator/Compilator/Compilator/MiniLang.g4 by ANTLR 4.13.1
 
 // Unreachable code detected
 #pragma warning disable 0162
@@ -98,11 +98,17 @@ public interface IMiniLangVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitAssignment([NotNull] MiniLangParser.AssignmentContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="MiniLangParser.incrementDecrement"/>.
+	/// Visit a parse tree produced by <see cref="MiniLangParser.incrementDecrementWithoutSemicolon"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitIncrementDecrement([NotNull] MiniLangParser.IncrementDecrementContext context);
+	Result VisitIncrementDecrementWithoutSemicolon([NotNull] MiniLangParser.IncrementDecrementWithoutSemicolonContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="MiniLangParser.incrementDecrementWithSemicolon"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitIncrementDecrementWithSemicolon([NotNull] MiniLangParser.IncrementDecrementWithSemicolonContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="MiniLangParser.ifStatement"/>.
 	/// </summary>

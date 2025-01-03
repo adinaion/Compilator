@@ -84,7 +84,7 @@ block: LBRACE statement* RBRACE;
 statement:
 	declaration
 	| assignment
-	| incrementDecrement
+	| incrementDecrementWithSemicolon
 	| ifStatement
 	| forStatement
 	| whileStatement
@@ -105,7 +105,13 @@ assignment:
 		| MOD_ASSIGN
 	) expression SEMICOLON;
 
-incrementDecrement:
+incrementDecrementWithoutSemicolon:
+	IDENTIFIER INCREMENT
+	| IDENTIFIER DECREMENT
+	| INCREMENT IDENTIFIER
+	| DECREMENT IDENTIFIER;
+
+incrementDecrementWithSemicolon:
 	IDENTIFIER INCREMENT SEMICOLON
 	| IDENTIFIER DECREMENT SEMICOLON
 	| INCREMENT IDENTIFIER SEMICOLON
@@ -115,7 +121,10 @@ ifStatement:
 	'if' LPAREN expression RPAREN block ('else' block)?;
 
 forStatement:
-	'for' LPAREN declaration expression SEMICOLON assignment RPAREN block;
+	'for' LPAREN declaration expression SEMICOLON (
+		assignment
+		| incrementDecrementWithoutSemicolon
+	) RPAREN block;
 
 whileStatement: 'while' LPAREN expression RPAREN block;
 
@@ -146,4 +155,4 @@ functionCall: IDENTIFIER LPAREN argumentList? RPAREN;
 argumentList: expression (COMMA expression)*;
 
 // Type rule for variable types
-type: 'int' | 'float' | 'string' | 'void';
+type: 'int' | 'float' | 'double' | 'string' | 'void';
