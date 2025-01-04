@@ -23,7 +23,6 @@ namespace MiniLang
 
             var variableType = ParseVariableType(variableTypeText);
 
-            // Handle global and local variables separately
             if (_programData.CurrentFunction == null)
             {
                 // Global variable
@@ -100,18 +99,22 @@ namespace MiniLang
                 Console.WriteLine($"Debug: Parameter '{paramName}' of type '{paramType}' added to function '{functionName}'.");
             }
 
-            // Set the current function
             _programData.CurrentFunction = function;
 
-            // Visit the function body
-            Visit(context.block());
+            // Check for recursivity
+            function.IsRecursive = IsRecursive(functionName, context.block());
 
-            // Reset the current function
+            Visit(context.block());
             _programData.CurrentFunction = null;
 
-            // Add the function to the list
             _programData.Functions.Add(function);
             return null;
+        }
+
+        // Check if a function is recursive
+        private bool IsRecursive(string functionName, MiniLangParser.BlockContext body)
+        {
+            return body.GetText().Contains(functionName);
         }
 
         // Visit If statements
@@ -119,8 +122,12 @@ namespace MiniLang
         {
             string condition = context.expression().GetText();
 
-            _programData.CurrentFunction?.ControlStructures.Add($"if (Condition: {condition}) Line {context.Start.Line}");
+            if (!IsBooleanExpression(condition))
+            {
+                throw CreateSemanticError($"Condition '{condition}' is not valid for an if statement.");
+            }
 
+            _programData.CurrentFunction?.ControlStructures.Add($"if (Condition: {condition}) Line {context.Start.Line}");
             Visit(context.block(0));
 
             if (context.block().Length > 1)
@@ -137,8 +144,12 @@ namespace MiniLang
         {
             string condition = context.expression().GetText();
 
-            _programData.CurrentFunction?.ControlStructures.Add($"while (Condition: {condition}) Line {context.Start.Line}");
+            if (!IsBooleanExpression(condition))
+            {
+                throw CreateSemanticError($"Condition '{condition}' is not valid for a while statement.");
+            }
 
+            _programData.CurrentFunction?.ControlStructures.Add($"while (Condition: {condition}) Line {context.Start.Line}");
             Visit(context.block());
             return null;
         }
@@ -149,7 +160,6 @@ namespace MiniLang
             string condition = context.expression()?.GetText() ?? "Unknown";
 
             _programData.CurrentFunction?.ControlStructures.Add($"for (Condition: {condition}) Line {context.Start.Line}");
-
             Visit(context.declaration());
             Visit(context.expression());
 
@@ -166,7 +176,27 @@ namespace MiniLang
             return null;
         }
 
-        // Helper to parse variable types
+        // Visit Function Call
+        public override object VisitFunctionCall([NotNull] MiniLangParser.FunctionCallContext context)
+        {
+            string functionName = context.IDENTIFIER().GetText();
+
+            var function = _programData.Functions.FirstOrDefault(f => f.Name == functionName);
+            if (function == null)
+            {
+                throw CreateSemanticError($"Function '{functionName}' is not defined.");
+            }
+
+            Console.WriteLine($"Debug: Calling function '{functionName}'.");
+
+            return null;
+        }
+
+        private bool IsBooleanExpression(string expression)
+        {
+            return expression.Contains("==") || expression.Contains("!=") || expression.Contains(">") || expression.Contains("<") || expression.Contains(">=") || expression.Contains("<=");
+        }
+
         private ProgramData.Variable.Type ParseVariableType(string type)
         {
             return type switch
@@ -180,7 +210,6 @@ namespace MiniLang
             };
         }
 
-        // Helper to create semantic errors
         private Exception CreateSemanticError(string message)
         {
             return new Exception($"Semantic Error: {message}");
