@@ -45,6 +45,7 @@ namespace MiniLang
             public List<Variable> Parameters { get; set; } = new List<Variable>();
             public List<Variable> LocalVariables { get; set; } = new List<Variable>();
             public List<string> ControlStructures { get; set; } = new List<string>();
+            public MiniLangParser.BlockContext Body { get; set; } // Contextul corpului funcției
             public bool IsRecursive { get; set; } = false;
 
             public override string ToString()
@@ -67,14 +68,15 @@ namespace MiniLang
                        $"Local Variables: {localVariables}\n" +
                        $"Control Structures:\n  {controlStructures}\n";
             }
-
-
         }
 
         // Date globale
         public List<LexicalUnit> LexicalUnits { get; set; } = new List<LexicalUnit>();
         public List<Variable> GlobalVariables { get; set; } = new List<Variable>();
         public List<Function> Functions { get; set; } = new List<Function>();
+
+        // Stivă pentru procesarea apelurilor de funcții
+        public Stack<Dictionary<string, Variable>> CallStack { get; set; } = new Stack<Dictionary<string, Variable>>();
 
         // Funcția curentă
 
@@ -113,7 +115,27 @@ namespace MiniLang
             using var writer = new StreamWriter(filePath);
             foreach (var function in Functions)
             {
-                writer.WriteLine(function.ToString());
+                writer.WriteLine($"Function {function.Name} ({(function.IsRecursive ? "Recursive" : "Iterative")})");
+                writer.WriteLine($"Return: {function.ReturnType}");
+
+                // Parametri
+                var parameters = function.Parameters.Count > 0
+                    ? string.Join(", ", function.Parameters.Select(p => $"{p.VariableType} {p.Name} {(p.Value != null ? $"= {p.Value}" : "(uninitialized)")}"))
+                    : "None";
+                writer.WriteLine($"Parameters: {parameters}");
+
+                // Variabile locale
+                var localVariables = function.LocalVariables.Count > 0
+                    ? string.Join(", ", function.LocalVariables.Select(v => $"{v.VariableType} {v.Name} {(v.Value != null ? $"= {v.Value}" : "(uninitialized)")}"))
+                    : "None";
+                writer.WriteLine($"Local Variables: {localVariables}");
+
+                // Structuri de control (placeholder, completăm mai jos)
+                var controlStructures = function.ControlStructures.Count > 0
+                    ? string.Join(", ", function.ControlStructures)
+                    : "None";
+                writer.WriteLine($"Control Structures: {controlStructures}");
+
                 writer.WriteLine();
             }
         }

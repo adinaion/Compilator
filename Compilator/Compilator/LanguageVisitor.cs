@@ -30,7 +30,7 @@ namespace MiniLang
             {
                 VariableType = variableType,
                 Name = variableName,
-                Value = null 
+                Value = null
             });
 
             _programData.AddLexicalUnit("VARIABLE", variableName, context.Start.Line);
@@ -114,60 +114,82 @@ namespace MiniLang
         // Evaluation of function calls
         private dynamic? EvaluateFunctionCall(ProgramData.Variable.Type expectedType, string expression)
         {
-            // Extragem numele funcției și parametrii
             var openParenIndex = expression.IndexOf('(');
             var closeParenIndex = expression.LastIndexOf(')');
-            if (openParenIndex == -1 || closeParenIndex == -1 || openParenIndex > closeParenIndex)
-            {
-                throw CreateSemanticError($"Invalid function call syntax: '{expression}'");
-            }
-
             var functionName = expression.Substring(0, openParenIndex).Trim();
             var arguments = expression.Substring(openParenIndex + 1, closeParenIndex - openParenIndex - 1)
                 .Split(',')
                 .Select(arg => arg.Trim())
                 .ToList();
 
-            // Găsim funcția
             var function = _programData.Functions.FirstOrDefault(f => f.Name == functionName);
             if (function == null)
-            {
                 throw CreateSemanticError($"Function '{functionName}' is not defined.");
-            }
 
             if (function.Parameters.Count != arguments.Count)
-            {
                 throw CreateSemanticError($"Function '{functionName}' expects {function.Parameters.Count} arguments, but {arguments.Count} were provided.");
-            }
 
-            // Validăm și evaluăm parametrii
-            for (int i = 0; i < arguments.Count; i++)
+            var localContext = new Dictionary<string, ProgramData.Variable>();
+
+            for (int i = 0; i < function.Parameters.Count; i++)
             {
-                var expectedParamType = function.Parameters[i].VariableType;
-                var evaluatedArgument = EvaluateExpression(expectedParamType, arguments[i]);
+                var param = function.Parameters[i];
+                var argumentValue = EvaluateExpression(param.VariableType, arguments[i]);
+                if (argumentValue == null)
+                    throw CreateSemanticError($"Type mismatch for parameter '{param.Name}' in function '{functionName}'.");
 
-                if (evaluatedArgument == null)
+                localContext[param.Name] = new ProgramData.Variable
                 {
-                    throw CreateSemanticError($"Type mismatch for argument {i + 1} in function '{functionName}'. Expected type: '{expectedParamType}'.");
-                }
+                    Name = param.Name,
+                    VariableType = param.VariableType,
+                    Value = argumentValue
+                };
             }
 
-            // Validăm tipul de returnare
+            _programData.CallStack.Push(localContext);
+
+            Console.WriteLine($"Debug: Executing function '{functionName}'.");
+
+            dynamic? returnValue = null;
+            try
+            {
+                Visit(function.Body);
+            }
+            catch (ReturnValueException ex)
+            {
+                returnValue = ex.Value;
+            }
+
+            _programData.CallStack.Pop();
+
             if (function.ReturnType != expectedType)
-            {
-                throw CreateSemanticError($"Type mismatch in function call to '{functionName}'. Expected return type '{expectedType}', but function returns '{function.ReturnType}'.");
-            }
+                throw CreateSemanticError($"Type mismatch in function call to '{functionName}'. Expected '{expectedType}', but got '{function.ReturnType}'.");
 
-            // Simulăm o valoare de întoarcere (aici trebuie să implementăm logica pentru execuția funcției, dacă este necesar)
-            return function.ReturnType switch
-            {
-                ProgramData.Variable.Type.Int => 42, // Exemplu de valoare întoarsă
-                ProgramData.Variable.Type.Float => 42.0f,
-                ProgramData.Variable.Type.Double => 42.0,
-                ProgramData.Variable.Type.String => "Example",
-                _ => null
-            };
+            Console.WriteLine($"Debug: Function '{functionName}' returned value '{returnValue}'.");
+            return returnValue;
         }
+
+        // Excepție specială pentru return
+        private class ReturnValueException : Exception
+        {
+            public dynamic? Value { get; }
+
+            public ReturnValueException(dynamic? value)
+            {
+                Value = value;
+            }
+        }
+
+        // În metoda VisitReturnStatement, aruncă excepția pentru return
+        public override object VisitReturnStatement([NotNull] MiniLangParser.ReturnStatementContext context)
+        {
+            string returnExpression = context.expression().GetText();
+            var returnValue = EvaluateExpression(_programData.CurrentFunction.ReturnType, returnExpression);
+
+            throw new ReturnValueException(returnValue);
+        }
+
+
 
 
         // Simple arithmetic expression evaluation (addition, subtraction, multiplication, division)
@@ -259,53 +281,17 @@ namespace MiniLang
         }
 
 
-        // Visit function declaration and handle parameters
-        public override object VisitFunctionDeclaration([NotNull] MiniLangParser.FunctionDeclarationContext context)
+        private List<string> ExtractControlStructures(MiniLangParser.BlockContext context)
         {
-            string returnType = context.type()?.GetText() ?? "void";
-            string functionName = context.IDENTIFIER().GetText();
-
-            if (_programData.Functions.Any(f => f.Name == functionName))
-                throw CreateSemanticError($"Function '{functionName}' is already declared.");
-
-            var function = new ProgramData.Function
+            var statements = new List<string>();
+            foreach (var statement in context.statement())
             {
-                Name = functionName,
-                ReturnType = ParseVariableType(returnType)
-            };
-
-            Console.WriteLine($"Debug: Defining function '{functionName}' with return type '{returnType}'.");
-
-            foreach (var parameter in context.parameterList()?.parameter() ?? Enumerable.Empty<MiniLangParser.ParameterContext>())
-            {
-                string paramType = parameter.type().GetText();
-                string paramName = parameter.IDENTIFIER().GetText();
-
-                Console.WriteLine($"Debug: Adding parameter '{paramName}' of type '{paramType}' to function '{functionName}'.");
-
-                if (function.Parameters.Any(p => p.Name == paramName))
-                {
-                    throw CreateSemanticError($"Parameter '{paramName}' is already declared in function '{functionName}'.");
-                }
-
-                function.Parameters.Add(new ProgramData.Variable
-                {
-                    Name = paramName,
-                    VariableType = ParseVariableType(paramType)
-                });
+                statements.Add(statement.GetText());
             }
-
-            _programData.Functions.Add(function);
-            _programData.CurrentFunction = function;
-
-            Visit(context.block());
-
-            Console.WriteLine($"Debug: Function '{functionName}' analysis completed.");
-
-            _programData.CurrentFunction = null;
-
-            return null;
+            return statements;
         }
+
+
 
 
         public override object VisitAssignment([NotNull] MiniLangParser.AssignmentContext context)
@@ -314,7 +300,7 @@ namespace MiniLang
             var variable = GetVariable(variableName);
 
             string expression = context.expression().GetText();
-            
+
             Console.WriteLine($"Debug: Assigning to variable '{variableName}' of type '{variable.VariableType}'.");
             Console.WriteLine($"Debug: Expression: '{expression}'.");
 
@@ -336,49 +322,69 @@ namespace MiniLang
             if (!IsBooleanExpression(condition))
                 throw CreateSemanticError($"Condition '{condition}' is not valid for an if statement.");
 
-            _programData.CurrentFunction.ControlStructures.Add($"if Line {context.Start.Line}");
+            // Înregistrăm structura de control
+            _programData.CurrentFunction?.ControlStructures.Add($"if (Condition: {condition}) Line {context.Start.Line}");
 
+            // Vizităm blocul 'if'
             Visit(context.block(0));
+
+            // Vizităm blocul 'else' dacă există
             if (context.block().Length > 1)
+            {
+                _programData.CurrentFunction?.ControlStructures.Add($"else Line {context.block(1).Start.Line}");
                 Visit(context.block(1));
+            }
 
-            return null;
-        }
-
-        // Handle While statement
-        public override object VisitWhileStatement([NotNull] MiniLangParser.WhileStatementContext context)
-        {
-            string condition = context.expression().GetText();
-
-            if (!IsBooleanExpression(condition))
-                throw CreateSemanticError($"Condition '{condition}' is not valid for a while statement.");
-
-            _programData.CurrentFunction.ControlStructures.Add($"while Line {context.Start.Line}");
-
-            Visit(context.block());
             return null;
         }
 
         // Handle For statement
         public override object VisitForStatement([NotNull] MiniLangParser.ForStatementContext context)
         {
-            _programData.CurrentFunction.ControlStructures.Add($"for Line {context.Start.Line}");
+            // Extragem condiția pentru bucla 'for'
+            string condition = context.expression()?.GetText() ?? "Unknown";
 
+            // Înregistrăm structura de control
+            _programData.CurrentFunction?.ControlStructures.Add($"for (Condition: {condition}) Line {context.Start.Line}");
+
+            // Vizităm părțile componente ale buclei 'for'
             Visit(context.declaration());
             Visit(context.expression());
 
             if (context.assignment() != null)
             {
-                Visit(context.assignment());  
+                Visit(context.assignment());
             }
             else if (context.incrementDecrementWithoutSemicolon() != null)
             {
-                Visit(context.incrementDecrementWithoutSemicolon()); 
+                Visit(context.incrementDecrementWithoutSemicolon());
             }
 
+            // Vizităm blocul de cod din bucla 'for'
             Visit(context.block());
+
             return null;
         }
+
+
+        // Handle While statement
+        public override object VisitWhileStatement([NotNull] MiniLangParser.WhileStatementContext context)
+        {
+            // Extragem condiția pentru bucla 'while'
+            string condition = context.expression().GetText();
+
+            if (!IsBooleanExpression(condition))
+                throw CreateSemanticError($"Condition '{condition}' is not valid for a while statement.");
+
+            // Înregistrăm structura de control
+            _programData.CurrentFunction?.ControlStructures.Add($"while (Condition: {condition}) Line {context.Start.Line}");
+
+            // Vizităm blocul de cod din bucla 'while'
+            Visit(context.block());
+
+            return null;
+        }
+
 
         // Consolidate adding variable logic into one method
         private void AddVariable(string name, string type, string value = null)
@@ -396,37 +402,121 @@ namespace MiniLang
         }
 
         // Override VisitDeclaration to handle both global and local variable declarations
+        public override object VisitFunctionDeclaration([NotNull] MiniLangParser.FunctionDeclarationContext context)
+        {
+            string returnType = context.type()?.GetText() ?? "void";
+            string functionName = context.IDENTIFIER().GetText();
+
+            if (_programData.Functions.Any(f => f.Name == functionName))
+                throw CreateSemanticError($"Function '{functionName}' is already declared.");
+
+            var function = new ProgramData.Function
+            {
+                Name = functionName,
+                ReturnType = ParseVariableType(returnType),
+                Body = context.block()
+            };
+
+            function.IsRecursive = IsRecursive(context.block(), functionName);
+
+            Console.WriteLine($"Debug: Defining function '{functionName}' with return type '{returnType}'.");
+
+            foreach (var parameter in context.parameterList()?.parameter() ?? Enumerable.Empty<MiniLangParser.ParameterContext>())
+            {
+                string paramType = parameter.type().GetText();
+                string paramName = parameter.IDENTIFIER().GetText();
+
+                if (function.Parameters.Any(p => p.Name == paramName))
+                    throw CreateSemanticError($"Parameter '{paramName}' is already declared in function '{functionName}'.");
+
+                function.Parameters.Add(new ProgramData.Variable
+                {
+                    Name = paramName,
+                    VariableType = ParseVariableType(paramType)
+                });
+
+                Console.WriteLine($"Debug: Parameter '{paramName}' of type '{paramType}' added to function '{functionName}'.");
+            }
+
+            if (function.ReturnType != ProgramData.Variable.Type.Void && !HasReturnStatement(function.Body))
+            {
+                throw CreateSemanticError($"Function '{functionName}' must have a return statement matching its return type '{returnType}'.");
+            }
+
+            _programData.Functions.Add(function);
+            return null;
+        }
+
+        private bool IsRecursive(MiniLangParser.BlockContext body, string functionName)
+        {
+            return body.GetText().Contains(functionName);
+        }
+
+
+        // Funcție pentru verificarea existenței unui return
+        private bool HasReturnStatement(MiniLangParser.BlockContext block)
+        {
+            foreach (var statement in block.statement())
+            {
+                if (statement.returnStatement() != null)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public override object VisitDeclaration([NotNull] MiniLangParser.DeclarationContext context)
         {
-            string name = context.IDENTIFIER().GetText();
-            string type = context.type().GetText();
-            string value = context.expression()?.GetText();
+            string variableName = context.IDENTIFIER().GetText();
+            string variableTypeText = context.type().GetText();
+            string valueExpression = context.expression()?.GetText();
 
-            Console.WriteLine($"Debug: variable '{name}' of type '{type}' with {value}");
+            // Parse the variable type
+            var variableType = ParseVariableType(variableTypeText);
+
+            // Evaluare expresie și validare
+            var evaluatedValue = valueExpression != null ? EvaluateExpression(variableType, valueExpression) : null;
+            if (valueExpression != null && evaluatedValue == null)
+            {
+                throw CreateSemanticError($"Type mismatch: Cannot assign value '{valueExpression}' to variable '{variableName}' of type '{variableType}'.");
+            }
 
             if (_programData.CurrentFunction == null)
             {
-                if (_programData.GlobalVariables.Any(v => v.Name == name))
+                // Variabilă globală
+                if (_programData.GlobalVariables.Any(v => v.Name == variableName))
                 {
-                    throw CreateSemanticError($"Variable '{name}' is already declared in the global scope.");
+                    throw CreateSemanticError($"Global variable '{variableName}' is already declared.");
                 }
-
-                AddVariable(name, type, value);
+                _programData.GlobalVariables.Add(new ProgramData.Variable
+                {
+                    Name = variableName,
+                    VariableType = variableType,
+                    Value = evaluatedValue
+                });
             }
             else
             {
+                // Variabilă locală
                 var currentFunction = _programData.CurrentFunction;
 
-                if (currentFunction.LocalVariables.Any(v => v.Name == name))
-                    throw CreateSemanticError($"Variable '{name}' is already declared in function '{currentFunction.Name}'.");
-
+                if (currentFunction.LocalVariables.Any(v => v.Name == variableName))
+                {
+                    throw CreateSemanticError($"Local variable '{variableName}' is already declared in function '{currentFunction.Name}'.");
+                }
                 currentFunction.LocalVariables.Add(new ProgramData.Variable
                 {
-                    Name = name,
-                    VariableType = ParseVariableType(type),
-                    Value = EvaluateExpression(ParseVariableType(type), value)
+                    Name = variableName,
+                    VariableType = variableType,
+                    Value = evaluatedValue
                 });
+
+                Console.WriteLine($"Debug: Declared local variable '{variableName}' of type '{variableType}' in function '{currentFunction.Name}'.");
             }
+
+            // Înregistrare lexicală
+            _programData.AddLexicalUnit("VARIABLE", variableName, context.Start.Line);
 
             return null;
         }
