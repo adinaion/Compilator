@@ -78,11 +78,21 @@ namespace MiniLang
         // Evaluate expressions for different types
         private dynamic? EvaluateExpression(ProgramData.Variable.Type type, string expression)
         {
+            Console.WriteLine($"Debug: Evaluating expression '{expression}' for type '{type}'.");
+
+            // Detectăm dacă este un apel de funcție
+            if (expression.Contains("(") && expression.Contains(")"))
+            {
+                return EvaluateFunctionCall(type, expression);
+            }
+
             var variable = _programData.GlobalVariables.FirstOrDefault(v => v.Name == expression)
                 ?? _programData.CurrentFunction?.LocalVariables.FirstOrDefault(v => v.Name == expression);
 
             if (variable != null)
             {
+                Console.WriteLine($"Debug: Found variable '{variable.Name}' with value '{variable.Value}' and type '{variable.VariableType}'.");
+
                 if (variable.VariableType != type)
                     throw CreateSemanticError($"Type mismatch: Variable '{expression}' is of type '{variable.VariableType}', expected '{type}'.");
 
@@ -93,34 +103,142 @@ namespace MiniLang
             {
                 ProgramData.Variable.Type.Int => int.TryParse(expression, out var intValue) ? intValue : EvaluateArithmeticExpression(expression),
                 ProgramData.Variable.Type.Float => float.TryParse(expression, out var floatValue) ? floatValue : null,
-                ProgramData.Variable.Type.Double => double.TryParse(expression, out var doubleValue) ? doubleValue : EvaluateArithmeticExpression(expression),
+                ProgramData.Variable.Type.Double => double.TryParse(expression, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var doubleValue)
+                    ? doubleValue
+                    : EvaluateArithmeticExpression(expression),
                 ProgramData.Variable.Type.String => expression.StartsWith("\"") && expression.EndsWith("\"") ? expression.Trim('"') : null,
                 _ => null
             };
         }
 
+        // Evaluation of function calls
+        private dynamic? EvaluateFunctionCall(ProgramData.Variable.Type expectedType, string expression)
+        {
+            // Extragem numele funcției și parametrii
+            var openParenIndex = expression.IndexOf('(');
+            var closeParenIndex = expression.LastIndexOf(')');
+            if (openParenIndex == -1 || closeParenIndex == -1 || openParenIndex > closeParenIndex)
+            {
+                throw CreateSemanticError($"Invalid function call syntax: '{expression}'");
+            }
+
+            var functionName = expression.Substring(0, openParenIndex).Trim();
+            var arguments = expression.Substring(openParenIndex + 1, closeParenIndex - openParenIndex - 1)
+                .Split(',')
+                .Select(arg => arg.Trim())
+                .ToList();
+
+            // Găsim funcția
+            var function = _programData.Functions.FirstOrDefault(f => f.Name == functionName);
+            if (function == null)
+            {
+                throw CreateSemanticError($"Function '{functionName}' is not defined.");
+            }
+
+            if (function.Parameters.Count != arguments.Count)
+            {
+                throw CreateSemanticError($"Function '{functionName}' expects {function.Parameters.Count} arguments, but {arguments.Count} were provided.");
+            }
+
+            // Validăm și evaluăm parametrii
+            for (int i = 0; i < arguments.Count; i++)
+            {
+                var expectedParamType = function.Parameters[i].VariableType;
+                var evaluatedArgument = EvaluateExpression(expectedParamType, arguments[i]);
+
+                if (evaluatedArgument == null)
+                {
+                    throw CreateSemanticError($"Type mismatch for argument {i + 1} in function '{functionName}'. Expected type: '{expectedParamType}'.");
+                }
+            }
+
+            // Validăm tipul de returnare
+            if (function.ReturnType != expectedType)
+            {
+                throw CreateSemanticError($"Type mismatch in function call to '{functionName}'. Expected return type '{expectedType}', but function returns '{function.ReturnType}'.");
+            }
+
+            // Simulăm o valoare de întoarcere (aici trebuie să implementăm logica pentru execuția funcției, dacă este necesar)
+            return function.ReturnType switch
+            {
+                ProgramData.Variable.Type.Int => 42, // Exemplu de valoare întoarsă
+                ProgramData.Variable.Type.Float => 42.0f,
+                ProgramData.Variable.Type.Double => 42.0,
+                ProgramData.Variable.Type.String => "Example",
+                _ => null
+            };
+        }
+
+
         // Simple arithmetic expression evaluation (addition, subtraction, multiplication, division)
         private dynamic? EvaluateArithmeticExpression(string expression)
         {
+            Console.WriteLine($"Debug: Evaluating arithmetic expression '{expression}'.");
+
             try
             {
-                var operands = expression.Split(new[] { '+', '-', '*', '/' }, StringSplitOptions.RemoveEmptyEntries);
+                // Validare: Expresia trebuie să conțină un operator aritmetic
+                if (!expression.Contains("+") && !expression.Contains("-") &&
+                    !expression.Contains("*") && !expression.Contains("/"))
+                {
+                    throw new FormatException($"Invalid arithmetic expression: '{expression}'");
+                }
 
-                var leftOperand = ParseNumber(operands[0]);
-                var rightOperand = ParseNumber(operands[1]);
+                // Split și validare: Expresia trebuie să aibă exact doi operanzi
+                var operators = new[] { '+', '-', '*', '/' };
+                var operatorIndex = expression.IndexOfAny(operators);
 
-                if (expression.Contains("+")) return leftOperand + rightOperand;
-                if (expression.Contains("-")) return leftOperand - rightOperand;
-                if (expression.Contains("*")) return leftOperand * rightOperand;
-                if (expression.Contains("/")) return rightOperand != 0 ? leftOperand / rightOperand : throw new DivideByZeroException();
+                if (operatorIndex == -1)
+                {
+                    throw new FormatException($"No operator found in expression: '{expression}'");
+                }
+
+                // Extragem operanzii și operatorul
+                var leftOperand = expression.Substring(0, operatorIndex).Trim();
+                var rightOperand = expression.Substring(operatorIndex + 1).Trim();
+                var operatorChar = expression[operatorIndex];
+
+                // Obținem valorile operanzilor
+                var leftValue = GetOperandValue(leftOperand);
+                var rightValue = GetOperandValue(rightOperand);
+
+                // Evaluăm expresia în funcție de operator
+                return operatorChar switch
+                {
+                    '+' => leftValue + rightValue,
+                    '-' => leftValue - rightValue,
+                    '*' => leftValue * rightValue,
+                    '/' => rightValue != 0 ? leftValue / rightValue : throw new DivideByZeroException(),
+                    _ => throw new InvalidOperationException($"Unknown operator '{operatorChar}' in expression '{expression}'")
+                };
             }
-            catch
+            catch (Exception ex)
             {
-                return null; 
+                Console.WriteLine($"Error: Failed to evaluate arithmetic expression '{expression}': {ex.Message}");
+                return null;
+            }
+        }
+
+        // Helper pentru obținerea valorii unui operand
+        private dynamic GetOperandValue(string operand)
+        {
+            // Dacă operandul este o variabilă, obținem valoarea acesteia
+            var variable = _programData.GlobalVariables.FirstOrDefault(v => v.Name == operand)
+                ?? _programData.CurrentFunction?.LocalVariables.FirstOrDefault(v => v.Name == operand);
+
+            if (variable != null)
+            {
+                if (variable.Value == null)
+                {
+                    throw CreateSemanticError($"Variable '{operand}' is declared but not initialized.");
+                }
+                return variable.Value;
             }
 
-            return null;
+            // Dacă operandul este un număr, îl parsăm
+            return ParseNumber(operand);
         }
+
 
         // Helper method to parse numbers as int, float, or double
         private dynamic ParseNumber(string value)
@@ -156,10 +274,14 @@ namespace MiniLang
                 ReturnType = ParseVariableType(returnType)
             };
 
+            Console.WriteLine($"Debug: Defining function '{functionName}' with return type '{returnType}'.");
+
             foreach (var parameter in context.parameterList()?.parameter() ?? Enumerable.Empty<MiniLangParser.ParameterContext>())
             {
                 string paramType = parameter.type().GetText();
                 string paramName = parameter.IDENTIFIER().GetText();
+
+                Console.WriteLine($"Debug: Adding parameter '{paramName}' of type '{paramType}' to function '{functionName}'.");
 
                 if (function.Parameters.Any(p => p.Name == paramName))
                 {
@@ -175,11 +297,16 @@ namespace MiniLang
 
             _programData.Functions.Add(function);
             _programData.CurrentFunction = function;
+
             Visit(context.block());
+
+            Console.WriteLine($"Debug: Function '{functionName}' analysis completed.");
+
             _programData.CurrentFunction = null;
 
             return null;
         }
+
 
         public override object VisitAssignment([NotNull] MiniLangParser.AssignmentContext context)
         {

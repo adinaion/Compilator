@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Ports;
+using System.Linq;
 
 namespace MiniLang
 {
@@ -46,12 +47,28 @@ namespace MiniLang
             public List<string> ControlStructures { get; set; } = new List<string>();
             public bool IsRecursive { get; set; } = false;
 
-            public override string ToString() =>
-                $"Function {Name} ({(IsRecursive ? "Recursive" : "Iterative")})\n" +
-                $"Return: {ReturnType}\n" +
-                $"Parameters: {string.Join(", ", Parameters)}\n" +
-                $"Local Variables: {string.Join(", ", LocalVariables)}\n" +
-                $"Control Structures: {string.Join(", ", ControlStructures)}\n";
+            public override string ToString()
+            {
+                string parameters = Parameters.Count > 0
+                    ? string.Join(", ", Parameters.Select(p => $"{p.VariableType} {p.Name} {(p.Value != null ? $"= {p.Value}" : "(uninitialized)")}"))
+                    : "None";
+
+                string localVariables = LocalVariables.Count > 0
+                    ? string.Join(", ", LocalVariables.Select(v => $"{v.VariableType} {v.Name} {(v.Value != null ? $"= {v.Value}" : "(uninitialized)")}"))
+                    : "None";
+
+                string controlStructures = ControlStructures.Count > 0
+                    ? string.Join("\n  ", ControlStructures)
+                    : "None";
+
+                return $"Function {Name} ({(IsRecursive ? "Recursive" : "Iterative")})\n" +
+                       $"Return: {ReturnType}\n" +
+                       $"Parameters: {parameters}\n" +
+                       $"Local Variables: {localVariables}\n" +
+                       $"Control Structures:\n  {controlStructures}\n";
+            }
+
+
         }
 
         // Date globale
