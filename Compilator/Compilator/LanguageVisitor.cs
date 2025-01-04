@@ -23,6 +23,14 @@ namespace MiniLang
 
             var variableType = ParseVariableType(variableTypeText);
 
+            dynamic? value = null;
+
+            if (context.expression() != null)
+            {
+                string expressionText = context.expression().GetText();
+                value = EvaluateExpression(variableType, expressionText);
+            }
+
             if (_programData.CurrentFunction == null)
             {
                 // Global variable
@@ -35,7 +43,7 @@ namespace MiniLang
                 {
                     Name = variableName,
                     VariableType = variableType,
-                    Value = null
+                    Value = value
                 });
             }
             else
@@ -52,7 +60,7 @@ namespace MiniLang
                 {
                     Name = variableName,
                     VariableType = variableType,
-                    Value = null
+                    Value = value
                 });
 
                 Console.WriteLine($"Debug: Declared local variable '{variableName}' of type '{variableType}' in function '{currentFunction.Name}'.");
@@ -210,6 +218,62 @@ namespace MiniLang
             };
         }
 
+        private dynamic? EvaluateExpression(ProgramData.Variable.Type type, string expression)
+        {
+            var variable = _programData.GlobalVariables.FirstOrDefault(v => v.Name == expression)
+                ?? _programData.CurrentFunction?.LocalVariables.FirstOrDefault(v => v.Name == expression);
+
+            if (variable != null)
+            {
+                if (variable.VariableType != type)
+                    throw CreateSemanticError($"Type mismatch: Variable '{expression}' is of type '{variable.VariableType}', expected '{type}'.");
+
+                return variable.Value;
+            }
+
+            return type switch
+            {
+                ProgramData.Variable.Type.Int => int.TryParse(expression, out var intValue) ? intValue : EvaluateArithmeticExpression(expression),
+                ProgramData.Variable.Type.Float => float.TryParse(expression, out var floatValue) ? floatValue : null,
+                ProgramData.Variable.Type.Double => double.TryParse(expression, out var doubleValue) ? doubleValue : EvaluateArithmeticExpression(expression),
+                ProgramData.Variable.Type.String => expression.StartsWith("\"") && expression.EndsWith("\"") ? expression.Trim('"') : null,
+                _ => null
+            };
+        }
+
+        // Simple arithmetic expression evaluation (addition, subtraction, multiplication, division)
+        private dynamic? EvaluateArithmeticExpression(string expression)
+        {
+            try
+            {
+                var operands = expression.Split(new[] { '+', '-', '*', '/' }, StringSplitOptions.RemoveEmptyEntries);
+
+                var leftOperand = ParseNumber(operands[0]);
+                var rightOperand = ParseNumber(operands[1]);
+
+                if (expression.Contains("+")) return leftOperand + rightOperand;
+                if (expression.Contains("-")) return leftOperand - rightOperand;
+                if (expression.Contains("*")) return leftOperand * rightOperand;
+                if (expression.Contains("/")) return rightOperand != 0 ? leftOperand / rightOperand : throw new DivideByZeroException();
+            }
+            catch
+            {
+                return null;
+            }
+
+            return null;
+        }
+
+        // Helper method to parse numbers as int, float, or double
+        private dynamic ParseNumber(string value)
+        {
+            if (int.TryParse(value, out var intValue)) return intValue;
+            if (float.TryParse(value, out var floatValue)) return floatValue;
+            if (double.TryParse(value, out var doubleValue)) return doubleValue;
+
+            throw new FormatException($"Invalid number format: {value}");
+        }
+      
         private Exception CreateSemanticError(string message)
         {
             return new Exception($"Semantic Error: {message}");
