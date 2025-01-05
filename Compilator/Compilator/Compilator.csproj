@@ -47,11 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CompilerError.cs" />
-    <Compile Include="CustomMiniLangLexer.cs" />
-    <Compile Include="ErrorHandler.cs" />
     <Compile Include="LanguageVisitor.cs" />
-    <Compile Include="LexicalError.cs" />
     <Compile Include="MiniLangBaseVisitor.cs" />
     <Compile Include="MiniLangLexer.cs" />
     <Compile Include="MiniLangParser.cs" />
@@ -59,8 +55,6 @@
     <Compile Include="Program.cs" />
     <Compile Include="ProgramData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SemanticError.cs" />
-    <Compile Include="SyntaxError.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
