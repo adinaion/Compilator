@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using MiniLang;
+using System.Globalization;
+using Antlr4.Runtime;
 
 namespace MiniLang
 {
@@ -15,7 +17,6 @@ namespace MiniLang
             _programData = programData;
         }
 
-        // Visit variable declarations (global and local)
         public override object VisitDeclaration([NotNull] MiniLangParser.DeclarationContext context)
         {
             string variableName = context.IDENTIFIER().GetText();
@@ -25,6 +26,15 @@ namespace MiniLang
 
             dynamic? value = null;
 
+            if (_programData.CurrentFunction != null)
+            {
+                var currentFunction = _programData.CurrentFunction;
+                if (currentFunction.Parameters.Any(p => p.Name == variableName))
+                {
+                    throw CreateSemanticError($"Variable '{variableName}' cannot be declared inside function '{currentFunction.Name}' because it is already a parameter.");
+                }
+            }
+
             if (context.expression() != null)
             {
                 string expressionText = context.expression().GetText();
@@ -33,7 +43,6 @@ namespace MiniLang
 
             if (_programData.CurrentFunction == null)
             {
-                // Global variable
                 if (_programData.GlobalVariables.Any(v => v.Name == variableName))
                 {
                     throw CreateSemanticError($"Global variable '{variableName}' is already declared.");
@@ -48,7 +57,6 @@ namespace MiniLang
             }
             else
             {
-                // Local variable
                 var currentFunction = _programData.CurrentFunction;
 
                 if (currentFunction.LocalVariables.Any(v => v.Name == variableName))
@@ -63,21 +71,26 @@ namespace MiniLang
                     Value = value
                 });
 
-                Console.WriteLine($"Debug: Declared local variable '{variableName}' of type '{variableType}' in function '{currentFunction.Name}'.");
             }
 
             _programData.AddLexicalUnit("VARIABLE", variableName, context.Start.Line);
             return null;
         }
 
-        // Visit function declarations
         public override object VisitFunctionDeclaration([NotNull] MiniLangParser.FunctionDeclarationContext context)
         {
             string returnType = context.type()?.GetText() ?? "void";
             string functionName = context.IDENTIFIER().GetText();
 
+            if (string.IsNullOrWhiteSpace(functionName))
+            {
+                throw CreateSemanticError("Function name cannot be empty.");
+            }
+
             if (_programData.Functions.Any(f => f.Name == functionName))
+            {
                 throw CreateSemanticError($"Function '{functionName}' is already declared.");
+            }
 
             var function = new ProgramData.Function
             {
@@ -85,8 +98,6 @@ namespace MiniLang
                 ReturnType = ParseVariableType(returnType),
                 Body = context.block()
             };
-
-            Console.WriteLine($"Debug: Defining function '{functionName}' with return type '{returnType}'.");
 
             foreach (var parameter in context.parameterList()?.parameter() ?? Enumerable.Empty<MiniLangParser.ParameterContext>())
             {
@@ -103,29 +114,25 @@ namespace MiniLang
                     Name = paramName,
                     VariableType = ParseVariableType(paramType)
                 });
-
-                Console.WriteLine($"Debug: Parameter '{paramName}' of type '{paramType}' added to function '{functionName}'.");
             }
 
             _programData.CurrentFunction = function;
 
-            // Check for recursivity
             function.IsRecursive = IsRecursive(functionName, context.block());
 
             Visit(context.block());
             _programData.CurrentFunction = null;
 
             _programData.Functions.Add(function);
+            Console.WriteLine($"Function added: {functionName}, ReturnType: {function.ReturnType}");
             return null;
         }
 
-        // Check if a function is recursive
         private bool IsRecursive(string functionName, MiniLangParser.BlockContext body)
         {
             return body.GetText().Contains(functionName);
         }
 
-        // Visit If statements
         public override object VisitIfStatement([NotNull] MiniLangParser.IfStatementContext context)
         {
             string condition = context.expression().GetText();
@@ -147,7 +154,6 @@ namespace MiniLang
             return null;
         }
 
-        // Visit While statements
         public override object VisitWhileStatement([NotNull] MiniLangParser.WhileStatementContext context)
         {
             string condition = context.expression().GetText();
@@ -162,7 +168,6 @@ namespace MiniLang
             return null;
         }
 
-        // Visit For statements
         public override object VisitForStatement([NotNull] MiniLangParser.ForStatementContext context)
         {
             string condition = context.expression()?.GetText() ?? "Unknown";
@@ -184,18 +189,16 @@ namespace MiniLang
             return null;
         }
 
-        // Visit Function Call
         public override object VisitFunctionCall([NotNull] MiniLangParser.FunctionCallContext context)
         {
             string functionName = context.IDENTIFIER().GetText();
+            Console.WriteLine($"Visiting function call: {functionName}");
 
             var function = _programData.Functions.FirstOrDefault(f => f.Name == functionName);
             if (function == null)
             {
                 throw CreateSemanticError($"Function '{functionName}' is not defined.");
             }
-
-            Console.WriteLine($"Debug: Calling function '{functionName}'.");
 
             return null;
         }
@@ -220,41 +223,45 @@ namespace MiniLang
 
         private dynamic? EvaluateExpression(ProgramData.Variable.Type type, string expression)
         {
-            var variable = _programData.GlobalVariables.FirstOrDefault(v => v.Name == expression)
-                ?? _programData.CurrentFunction?.LocalVariables.FirstOrDefault(v => v.Name == expression);
-
-            if (variable != null)
-            {
-                if (variable.VariableType != type)
-                    throw CreateSemanticError($"Type mismatch: Variable '{expression}' is of type '{variable.VariableType}', expected '{type}'.");
-
-                return variable.Value;
-            }
-
             return type switch
             {
-                ProgramData.Variable.Type.Int => int.TryParse(expression, out var intValue) ? intValue : EvaluateArithmeticExpression(expression),
-                ProgramData.Variable.Type.Float => float.TryParse(expression, out var floatValue) ? floatValue : null,
-                ProgramData.Variable.Type.Double => double.TryParse(expression, out var doubleValue) ? doubleValue : EvaluateArithmeticExpression(expression),
+                ProgramData.Variable.Type.Int => int.TryParse(expression, out var intValue) ? intValue : EvaluateArithmeticExpression(type,expression),
+                ProgramData.Variable.Type.Float => float.TryParse(expression, NumberStyles.Float, CultureInfo.InvariantCulture, out var floatValue) ? floatValue : EvaluateArithmeticExpression(type,expression),
+                ProgramData.Variable.Type.Double => double.TryParse(expression, NumberStyles.Float, CultureInfo.InvariantCulture, out var doubleValue) ? doubleValue : EvaluateArithmeticExpression(type,expression),
                 ProgramData.Variable.Type.String => expression.StartsWith("\"") && expression.EndsWith("\"") ? expression.Trim('"') : null,
-                _ => null
+                _ => throw CreateSemanticError($"Unsupported type '{type}' for expression.")
             };
         }
 
-        // Simple arithmetic expression evaluation (addition, subtraction, multiplication, division)
-        private dynamic? EvaluateArithmeticExpression(string expression)
+        private dynamic? EvaluateArithmeticExpression(ProgramData.Variable.Type type,string expression)
         {
             try
             {
-                var operands = expression.Split(new[] { '+', '-', '*', '/' }, StringSplitOptions.RemoveEmptyEntries);
+                var operands = expression.Split(new[] { '+', '-', '*', '/', '%' }, StringSplitOptions.RemoveEmptyEntries);
 
-                var leftOperand = ParseNumber(operands[0]);
-                var rightOperand = ParseNumber(operands[1]);
+                var leftOperand = EvaluateOperand(operands[0].Trim(), type);
+                var rightOperand = EvaluateOperand(operands[1].Trim(), type);
 
                 if (expression.Contains("+")) return leftOperand + rightOperand;
                 if (expression.Contains("-")) return leftOperand - rightOperand;
                 if (expression.Contains("*")) return leftOperand * rightOperand;
                 if (expression.Contains("/")) return rightOperand != 0 ? leftOperand / rightOperand : throw new DivideByZeroException();
+                if (expression.Contains("%"))
+                {
+                    if (rightOperand == 0)
+                    {
+                        throw new DivideByZeroException("Modulo by zero is not allowed.");
+                    }
+
+                    if (leftOperand is int && rightOperand is int)
+                    {
+                        return leftOperand % rightOperand;
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("Modulo operation is only supported for integers.");
+                    }
+                }
             }
             catch
             {
@@ -262,9 +269,32 @@ namespace MiniLang
             }
 
             return null;
+
         }
 
-        // Helper method to parse numbers as int, float, or double
+        private dynamic EvaluateOperand(string operand, ProgramData.Variable.Type expectedType)
+        {
+            var variable = _programData.GlobalVariables.FirstOrDefault(v => v.Name == operand)
+                ?? _programData.CurrentFunction?.LocalVariables.FirstOrDefault(v => v.Name == operand);
+
+            if (variable != null)
+            {
+                if (variable.Value == null)
+                {
+                    throw CreateSemanticError($"Variable '{operand}' is uninitialized.");
+                }
+
+                if (variable.VariableType != expectedType)
+                {
+                    throw CreateSemanticError($"Type mismatch: Variable '{operand}' is of type '{variable.VariableType}', expected '{expectedType}'.");
+                }
+
+                return variable.Value;
+            }
+
+            return ParseNumber(operand);
+        }
+
         private dynamic ParseNumber(string value)
         {
             if (int.TryParse(value, out var intValue)) return intValue;
@@ -273,7 +303,7 @@ namespace MiniLang
 
             throw new FormatException($"Invalid number format: {value}");
         }
-      
+
         private Exception CreateSemanticError(string message)
         {
             return new Exception($"Semantic Error: {message}");

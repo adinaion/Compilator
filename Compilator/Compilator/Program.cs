@@ -8,7 +8,6 @@ public class Program
 {
     public static void Main()
     {
-        // Citește fișierul sursă
         Console.WriteLine("Se citeste fisierul sursa...");
         string filePath = "../../../ProgramExemple.txt";
 
@@ -20,7 +19,6 @@ public class Program
 
         string sourceCode = File.ReadAllText(filePath);
 
-        // Creează lexer și parser
         Console.WriteLine("Se analizeaza unitatile lexicale...");
         var lexer = new MiniLangLexer(new AntlrInputStream(sourceCode));
         var tokens = new CommonTokenStream(lexer);
@@ -29,10 +27,8 @@ public class Program
         var parser = new MiniLangParser(tokens);
         var tree = parser.program();
 
-        // Inițializează ProgramData
         var programData = new ProgramData();
 
-        // Colectează unitățile lexicale
         foreach (var token in tokens.GetTokens())
         {
             programData.AddLexicalUnit(
@@ -42,22 +38,16 @@ public class Program
             );
         }
 
-        
-
-        // Analiza semantică
         Console.WriteLine("Se efectueaza analiza semantica...");
         var visitor = new LanguageVisitor(programData);
         visitor.Visit(tree);
 
-        // Afișează informațiile colectate
         PrintResults(programData);
 
-        // Salvează datele în fișiere
         SaveProgramData(programData);
 
         Console.WriteLine("Analiza lexicala, sintactica si semantica s-a încheiat cu succes!");
     }
-
     private static void PrintResults(ProgramData programData)
     {
         Console.WriteLine("\nUnitati lexicale:\n");

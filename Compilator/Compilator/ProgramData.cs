@@ -8,7 +8,6 @@ namespace MiniLang
 {
     public class ProgramData
     {
-        // Structură pentru unități lexicale
         public class LexicalUnit
         {
             public string Token { get; set; }
@@ -18,7 +17,6 @@ namespace MiniLang
             public override string ToString() => $"<{Token}, {Lexeme}, Line {Line}>";
         }
 
-        // Structură pentru variabile
         public class Variable
         {
             public enum Type
@@ -37,7 +35,6 @@ namespace MiniLang
             public override string ToString() => $"{VariableType} {Name} = {Value}";
         }
 
-        // Structură pentru funcții
         public class Function
         {
             public string Name { get; set; }
@@ -45,7 +42,7 @@ namespace MiniLang
             public List<Variable> Parameters { get; set; } = new List<Variable>();
             public List<Variable> LocalVariables { get; set; } = new List<Variable>();
             public List<string> ControlStructures { get; set; } = new List<string>();
-            public MiniLangParser.BlockContext Body { get; set; } // Contextul corpului funcției
+            public MiniLangParser.BlockContext Body { get; set; } 
             public bool IsRecursive { get; set; } = false;
 
             public override string ToString()
@@ -70,25 +67,19 @@ namespace MiniLang
             }
         }
 
-        // Date globale
         public List<LexicalUnit> LexicalUnits { get; set; } = new List<LexicalUnit>();
         public List<Variable> GlobalVariables { get; set; } = new List<Variable>();
         public List<Function> Functions { get; set; } = new List<Function>();
 
-        // Stivă pentru procesarea apelurilor de funcții
         public Stack<Dictionary<string, Variable>> CallStack { get; set; } = new Stack<Dictionary<string, Variable>>();
-
-        // Funcția curentă
 
         public Function CurrentFunction { get; set; }
 
-        // Adăugare unitate lexicală
         public void AddLexicalUnit(string token, string lexeme, int line)
         {
             LexicalUnits.Add(new LexicalUnit { Token = token, Lexeme = lexeme, Line = line });
         }
 
-        // Salvare unități lexicale într-un fișier
         public void SaveLexicalUnits(string filePath)
         {
             using var writer = new StreamWriter(filePath);
@@ -98,7 +89,6 @@ namespace MiniLang
             }
         }
 
-        // Salvare variabile globale într-un fișier
         public void SaveGlobalVariables(string filePath)
         {
             using var writer = new StreamWriter(filePath);
@@ -109,7 +99,6 @@ namespace MiniLang
             }
         }
 
-        // Salvare funcții într-un fișier
         public void SaveFunctions(string filePath)
         {
             using var writer = new StreamWriter(filePath);
@@ -118,19 +107,16 @@ namespace MiniLang
                 writer.WriteLine($"Function {function.Name} ({(function.IsRecursive ? "Recursive" : "Iterative")})");
                 writer.WriteLine($"Return: {function.ReturnType}");
 
-                // Parametri
                 var parameters = function.Parameters.Count > 0
                     ? string.Join(", ", function.Parameters.Select(p => $"{p.VariableType} {p.Name} {(p.Value != null ? $"= {p.Value}" : "(uninitialized)")}"))
                     : "None";
                 writer.WriteLine($"Parameters: {parameters}");
 
-                // Variabile locale
                 var localVariables = function.LocalVariables.Count > 0
                     ? string.Join(", ", function.LocalVariables.Select(v => $"{v.VariableType} {v.Name} {(v.Value != null ? $"= {v.Value}" : "(uninitialized)")}"))
                     : "None";
                 writer.WriteLine($"Local Variables: {localVariables}");
 
-                // Structuri de control (placeholder, completăm mai jos)
                 var controlStructures = function.ControlStructures.Count > 0
                     ? string.Join(", ", function.ControlStructures)
                     : "None";
